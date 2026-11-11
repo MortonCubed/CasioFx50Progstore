@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASIO fx-50FH Program Studio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas CDN for rendering format card as photo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        casio: {
+                            blue: '#1a365d',
+                            accent: '#0284c7',
+                            lcdBg: '#9daaa0',
+                            lcdText: '#18241b'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['Share Tech Mono', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .lcd-display {
+            background-color: #9ea99b;
+            color: #17261a;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.35);
+            text-shadow: 0 0 1px rgba(0,0,0,0.25);
+        }
+        .dark .lcd-display {
+            background-color: #1c2b20;
+            color: #79db8d;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+            text-shadow: 0 0 3px rgba(121, 219, 141, 0.4);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100,116,139,0.4);
+            border-radius: 0px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen font-sans transition-colors duration-200">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900 border-b border-slate-800 text-white sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-sky-600 text-white font-bold px-2.5 py-1 rounded-none text-lg tracking-wider">
+                    CASIO
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">fx-50FH Studio</h1>
+                    <p class="text-xs text-slate-400">HKDSE Calculator Code Studio & Documentation Tool</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button id="btn-export" title="Export Programs JSON" class="px-3 py-1.5 rounded-none bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-file-export text-sky-400"></i> <span class="hidden sm:inline">Export</span>
+                </button>
+                <label title="Import Programs JSON" class="px-3 py-1.5 rounded-none bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer transition">
+                    <i class="fa-solid fa-file-import text-emerald-400"></i> <span class="hidden sm:inline">Import</span>
+                    <input type="file" id="input-import" accept=".json" class="hidden">
+                </label>
+                <button id="btn-theme-toggle" title="Toggle Light/Dark Theme" class="p-2 rounded-none bg-slate-800 hover:bg-slate-700 text-amber-400">
+                    <i class="fa-solid fa-sun dark:hidden"></i>
+                    <i class="fa-solid fa-moon hidden dark:inline"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Editor & Keypads -->
+        <section class="lg:col-span-7 xl:col-span-8 space-y-5">
+            
+            <!-- Metadata Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-none p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
+                    <h2 class="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-sky-500"></i> Program Details
+                    </h2>
+                    <span id="byte-badge" class="px-3 py-1 bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-mono font-semibold text-xs rounded-none border border-sky-300 dark:border-sky-800">
+                        Memory: 0 Bytes
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Program Title</label>
+                        <input type="text" id="prog-title" placeholder="e.g. Quadratic Formula (一元二次方程)" 
+                            class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Memory Slot</label>
+                        <select id="prog-slot" class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none focus:ring-2 focus:ring-sky-500 outline-none font-semibold">
+                            <option value="P1">Slot P1</option>
+                            <option value="P2">Slot P2</option>
+                            <option value="P3">Slot P3</option>
+                            <option value="P4">Slot P4</option>
+                            <option value="Draft">Draft / Note</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Variables Setup / Mapping</label>
+                        <input type="text" id="prog-vars" placeholder="e.g. A=a, B=b, C=c -> X=x1, Y=x2" 
+                            class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Category / Topic</label>
+                        <input type="text" id="prog-category" placeholder="e.g. Algebra, Geometry, Trigonometry" 
+                            class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Description & HKDSE Usage Notes</label>
+                    <textarea id="prog-desc" rows="2" placeholder="Input parameters, execution steps, output sequence..." 
+                        class="w-full px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none focus:ring-2 focus:ring-sky-500 outline-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Virtual Keypad Toolbar with Categorized Tabs -->
+            <div class="bg-slate-800 dark:bg-slate-950 rounded-none p-3.5 shadow-md border border-slate-700">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-slate-700 pb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-keyboard text-amber-400"></i> Token Palette
+                    </span>
+                    <!-- Token Live Search Filter Input -->
+                    <div class="relative w-full sm:w-48">
+                        <i class="fa-solid fa-filter absolute left-2.5 top-2 text-slate-400 text-[10px]"></i>
+                        <input type="text" id="token-search-input" placeholder="Search tokens..." 
+                            class="w-full pl-7 pr-2 py-1 text-[11px] bg-slate-900 border border-slate-700 rounded-none text-slate-200 focus:ring-1 focus:ring-amber-400 outline-none">
+                    </div>
+                </div>
+
+                <!-- Tab Navigation Buttons -->
+                <div class="flex flex-wrap gap-1 mb-3" id="tab-headers">
+                    <button data-tab="tab-all" class="tab-btn px-2.5 py-1 text-xs rounded-none bg-amber-500 text-slate-950 font-bold">All</button>
+                    <button data-tab="tab-logic" class="tab-btn px-2.5 py-1 text-xs rounded-none bg-slate-700 text-slate-300 hover:bg-slate-600 font-medium">Logic & Relational</button>
+                    <button data-tab="tab-control" class="tab-btn px-2.5 py-1 text-xs rounded-none bg-slate-700 text-slate-300 hover:bg-slate-600 font-medium">Control Flow</button>
+                    <button data-tab="tab-vars" class="tab-btn px-2.5 py-1 text-xs rounded-none bg-slate-700 text-slate-300 hover:bg-slate-600 font-medium">Variables & Memory</button>
+                    <button data-tab="tab-math" class="tab-btn px-2.5 py-1 text-xs rounded-none bg-slate-700 text-slate-300 hover:bg-slate-600 font-medium">Math & Powers</button>
+                    <button data-tab="tab-stat" class="tab-btn px-2.5 py-1 text-xs rounded-none bg-slate-700 text-slate-300 hover:bg-slate-600 font-medium">Modes & Stat</button>
+                </div>
+
+                <!-- Tab Panels -->
+                <div id="tab-contents">
+
+                    <!-- Tab 0: All Tokens -->
+                    <div id="tab-all" class="tab-panel flex flex-wrap gap-1.5">
+                        <button class="btn-token bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="ClrMemory">ClrMemory</button>
+                        <button class="btn-token bg-sky-700 hover:bg-sky-600 text-white font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="?">?</button>
+                        <button class="btn-token bg-sky-700 hover:bg-sky-600 text-white font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="→">→</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-white font-mono rounded-none px-2 py-1 text-xs" data-token=":">:</button>
+                        <button class="btn-token bg-amber-700 hover:bg-amber-600 text-white font-mono font-bold text-base rounded-none px-2 py-1" title="Display / Pause Triangle (◢)" data-token="◢">◢</button>
+                        <button class="btn-token bg-indigo-700 hover:bg-indigo-600 text-white font-mono font-bold text-xs rounded-none px-2 py-1" title="Condition Arrow (=>)" data-token="=>">=></button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs border border-emerald-400" title="Rectangular to Polar Conversion Pol(" data-token="Pol(">Pol(</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs border border-emerald-400" title="Polar to Rectangular Conversion Rec(" data-token="Rec(">Rec(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="=">=</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="≠">≠</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token=">">&gt;</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="<">&lt;</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="≥">≥</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="≤">≤</button>
+                        <button class="btn-token bg-cyan-700 hover:bg-cyan-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Goto ">Goto</button>
+                        <button class="btn-token bg-cyan-700 hover:bg-cyan-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Lbl ">Lbl</button>
+                        <button class="btn-token bg-rose-700 hover:bg-rose-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Break">Break</button>
+                        <button class="btn-token bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="If ">If</button>
+                        <button class="btn-token bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Then ">Then</button>
+                        <button class="btn-token bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Else ">Else</button>
+                        <button class="btn-token bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="IfEnd">IfEnd</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="While ">While</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="WhileEnd">WhileEnd</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="For ">For</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="To ">To</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Step ">Step</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Next">Next</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 rounded-none px-2 py-1 text-xs" data-token="A">A</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 rounded-none px-2 py-1 text-xs" data-token="B">B</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 rounded-none px-2 py-1 text-xs" data-token="C">C</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 rounded-none px-2 py-1 text-xs" data-token="D">D</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 rounded-none px-2 py-1 text-xs" data-token="X">X</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 rounded-none px-2 py-1 text-xs" data-token="Y">Y</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 rounded-none px-2 py-1 text-xs" data-token="M">M</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-amber-400 font-bold border border-slate-700 rounded-none px-2 py-1 text-xs" data-token="Ans">Ans</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="Rnd(">Rnd(</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="Fix ">Fix</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="Sci ">Sci</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="Norm ">Norm</button>
+                        <button class="btn-token bg-sky-900 hover:bg-sky-800 text-sky-200 font-bold border border-sky-700 rounded-none px-2 py-1 text-xs" title="Fraction Symbol / Over (˩)" data-token="˩">˩</button>
+                        <button class="btn-token bg-sky-900 hover:bg-sky-800 text-sky-200 font-bold border border-sky-700 rounded-none px-2 py-1 text-xs" title="Fraction Over Symbol (⌟)" data-token="⌟">⌟</button>
+                        <button class="btn-token bg-blue-800 hover:bg-blue-700 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Deg">Deg</button>
+                        <button class="btn-token bg-blue-800 hover:bg-blue-700 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Rad">Rad</button>
+                        <button class="btn-token bg-blue-800 hover:bg-blue-700 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Gra">Gra</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="ʳ">ʳ</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="√(">√ (</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Cube Root (∛()" data-token="∛(">∛ (</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Absolute Value Abs(" data-token="Abs(">Abs(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="^">^</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Inverse / Power -1 (⁻¹)" data-token="⁻¹">⁻¹</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Square (²)" data-token="²">²</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Cube (³)" data-token="³">³</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="sin(">sin(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="cos(">cos(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="tan(">tan(</button>
+                        <button class="btn-token bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-none px-2 py-1 text-xs border border-amber-400" title="Arc Tangent tan⁻¹(" data-token="tan⁻¹(">tan⁻¹(</button>
+                        <button class="btn-token bg-amber-800 hover:bg-amber-700 text-amber-200 font-bold rounded-none px-2 py-1 text-xs" title="Arc Sine sin⁻¹(" data-token="sin⁻¹(">sin⁻¹(</button>
+                        <button class="btn-token bg-amber-800 hover:bg-amber-700 text-amber-200 font-bold rounded-none px-2 py-1 text-xs" title="Arc Cosine cos⁻¹(" data-token="cos⁻¹(">cos⁻¹(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="log(">log(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="ln(">ln(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Euler's e constant" data-token="e">e</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Natural exponential e^(" data-token="e^(">e^(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Base 10 power 10^(" data-token="10^(">10^(</button>
+                        <button class="btn-token bg-rose-800 hover:bg-rose-700 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="FreqOn">FreqOn</button>
+                        <button class="btn-token bg-rose-800 hover:bg-rose-700 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="FreqOff">FreqOff</button>
+                        <button class="btn-token bg-rose-900 hover:bg-rose-800 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="ClrStat">ClrStat</button>
+                        <button class="btn-token bg-amber-600 hover:bg-amber-500 text-white font-mono font-bold rounded-none px-2 py-1 text-xs" title="Stat Data Entry Token (DT)" data-token="DT">DT</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="COMP">COMP</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="SD">SD</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="REG">REG</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="CMPLX">CMPLX</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="BASE">BASE</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="a+bi">a+bi</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="r∠θ">r∠θ</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" title="Complex Conjugate Function" data-token="Conjg(">Conjg(</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" title="Argument of Complex Number" data-token="Arg(">Arg(</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="EngOn">EngOn</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="EngOff">EngOff</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="LineMode">LineMode</button>
+                        <button class="btn-token bg-amber-900 hover:bg-amber-800 text-amber-200 font-bold rounded-none px-2 py-1 text-xs" data-token="M+">M+</button>
+                        <button class="btn-token bg-amber-900 hover:bg-amber-800 text-amber-200 font-bold rounded-none px-2 py-1 text-xs" data-token="M-">M-</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="n">n</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="x̄">x̄</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="ȳ">ȳ</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑x">∑x</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑x²">∑x²</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑y">∑y</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑y²">∑y²</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑xy">∑xy</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono text-[11px] rounded-none px-2 py-1" data-token="xσn">xσn</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono text-[11px] rounded-none px-2 py-1" data-token="xσn-1">xσn-1</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono text-[11px] rounded-none px-2 py-1" data-token="yσn">yσn</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono text-[11px] rounded-none px-2 py-1" data-token="yσn-1">yσn-1</button>
+                    </div>
+
+                    <!-- Tab 1: Logic & Relational -->
+                    <div id="tab-logic" class="tab-panel hidden flex flex-wrap gap-1.5">
+                        <button class="btn-token bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="ClrMemory">ClrMemory</button>
+                        <button class="btn-token bg-sky-700 hover:bg-sky-600 text-white font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="?">?</button>
+                        <button class="btn-token bg-sky-700 hover:bg-sky-600 text-white font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="→">→</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-white font-mono rounded-none px-2 py-1 text-xs" data-token=":">:</button>
+                        <button class="btn-token bg-amber-700 hover:bg-amber-600 text-white font-mono font-bold text-base rounded-none px-2 py-1" title="Display / Pause Triangle (◢)" data-token="◢">◢</button>
+                        <button class="btn-token bg-indigo-700 hover:bg-indigo-600 text-white font-mono font-bold text-xs rounded-none px-2 py-1" title="Condition Arrow (=>)" data-token="=>">=></button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="=">=</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="≠">≠</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token=">">&gt;</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="<">&lt;</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="≥">≥</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-mono font-bold text-sm rounded-none px-2 py-1" data-token="≤">≤</button>
+                    </div>
+
+                    <!-- Tab 2: Control Flow -->
+                    <div id="tab-control" class="tab-panel hidden flex flex-wrap gap-1.5">
+                        <button class="btn-token bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="If ">If</button>
+                        <button class="btn-token bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Then ">Then</button>
+                        <button class="btn-token bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Else ">Else</button>
+                        <button class="btn-token bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="IfEnd">IfEnd</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="While ">While</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="WhileEnd">WhileEnd</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="For ">For</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="To ">To</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Step ">Step</button>
+                        <button class="btn-token bg-teal-700 hover:bg-teal-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Next">Next</button>
+                        <button class="btn-token bg-cyan-700 hover:bg-cyan-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Goto ">Goto</button>
+                        <button class="btn-token bg-cyan-700 hover:bg-cyan-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Lbl ">Lbl</button>
+                        <button class="btn-token bg-rose-700 hover:bg-rose-600 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Break">Break</button>
+                    </div>
+
+                    <!-- Tab 3: Variables & Memory -->
+                    <div id="tab-vars" class="tab-panel hidden flex flex-wrap gap-1.5">
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 px-3 py-1 text-sm rounded-none" data-token="A">A</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 px-3 py-1 text-sm rounded-none" data-token="B">B</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 px-3 py-1 text-sm rounded-none" data-token="C">C</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 px-3 py-1 text-sm rounded-none" data-token="D">D</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 px-3 py-1 text-sm rounded-none" data-token="X">X</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 px-3 py-1 text-sm rounded-none" data-token="Y">Y</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-pink-400 font-bold border border-slate-700 px-3 py-1 text-sm rounded-none" data-token="M">M</button>
+                        <button class="btn-token bg-slate-900 hover:bg-slate-700 text-amber-400 font-bold border border-slate-700 px-3 py-1 text-sm rounded-none" data-token="Ans">Ans</button>
+                        <button class="btn-token bg-amber-900 hover:bg-amber-800 text-amber-200 font-bold px-3 py-1 text-sm rounded-none" data-token="M+">M+</button>
+                        <button class="btn-token bg-amber-900 hover:bg-amber-800 text-amber-200 font-bold px-3 py-1 text-sm rounded-none" data-token="M-">M-</button>
+                    </div>
+
+                    <!-- Tab 4: Math & Powers -->
+                    <div id="tab-math" class="tab-panel hidden flex flex-wrap gap-1.5">
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs border border-emerald-400" title="Rectangular to Polar Pol(" data-token="Pol(">Pol(</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs border border-emerald-400" title="Polar to Rectangular Rec(" data-token="Rec(">Rec(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Inverse / Power -1 (⁻¹)" data-token="⁻¹">⁻¹</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Square (²)" data-token="²">²</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Cube (³)" data-token="³">³</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="^">^</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="√(">√ (</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Cube Root (∛()" data-token="∛(">∛ (</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Absolute Value Abs(" data-token="Abs(">Abs(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="sin(">sin(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="cos(">cos(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="tan(">tan(</button>
+                        <button class="btn-token bg-amber-800 hover:bg-amber-700 text-amber-200 font-bold rounded-none px-2 py-1 text-xs" title="Arc Sine sin⁻¹(" data-token="sin⁻¹(">sin⁻¹(</button>
+                        <button class="btn-token bg-amber-800 hover:bg-amber-700 text-amber-200 font-bold rounded-none px-2 py-1 text-xs" title="Arc Cosine cos⁻¹(" data-token="cos⁻¹(">cos⁻¹(</button>
+                        <button class="btn-token bg-amber-800 hover:bg-amber-700 text-amber-200 font-bold rounded-none px-2 py-1 text-xs" title="Arc Tangent tan⁻¹(" data-token="tan⁻¹(">tan⁻¹(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="log(">log(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="ln(">ln(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Euler's e constant" data-token="e">e</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Natural exponential e^(" data-token="e^(">e^(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Base 10 power 10^(" data-token="10^(">10^(</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Pi Constant" data-token="π">π</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="Rnd(">Rnd(</button>
+                        <button class="btn-token bg-sky-900 hover:bg-sky-800 text-sky-200 font-bold border border-sky-700 rounded-none px-2 py-1 text-xs" title="Fraction Symbol / Over (˩)" data-token="˩">˩</button>
+                        <button class="btn-token bg-sky-900 hover:bg-sky-800 text-sky-200 font-bold border border-sky-700 rounded-none px-2 py-1 text-xs" title="Fraction Over Symbol (⌟)" data-token="⌟">⌟</button>
+                        <button class="btn-token bg-blue-800 hover:bg-blue-700 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Deg">Deg</button>
+                        <button class="btn-token bg-blue-800 hover:bg-blue-700 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Rad">Rad</button>
+                        <button class="btn-token bg-blue-800 hover:bg-blue-700 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="Gra">Gra</button>
+                        <button class="btn-token bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" title="Radian angle unit (r)" data-token="ʳ">ʳ</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="Fix ">Fix</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="Sci ">Sci</button>
+                        <button class="btn-token bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-none px-2 py-1 text-xs" data-token="Norm ">Norm</button>
+                    </div>
+
+                    <!-- Tab 5: Modes & Stat -->
+                    <div id="tab-stat" class="tab-panel hidden flex flex-wrap gap-1.5">
+                        <button class="btn-token bg-rose-800 hover:bg-rose-700 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="FreqOn">FreqOn</button>
+                        <button class="btn-token bg-rose-800 hover:bg-rose-700 text-amber-300 font-bold rounded-none px-2 py-1 text-xs" data-token="FreqOff">FreqOff</button>
+                        <button class="btn-token bg-rose-900 hover:bg-rose-800 text-white font-semibold rounded-none px-2 py-1 text-xs" data-token="ClrStat">ClrStat</button>
+                        <button class="btn-token bg-amber-600 hover:bg-amber-500 text-white font-mono font-bold rounded-none px-2 py-1 text-xs" title="Stat Data Entry Token (DT)" data-token="DT">DT</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="COMP">COMP</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="SD">SD</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="REG">REG</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="CMPLX">CMPLX</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-none px-2 py-1 text-xs" data-token="BASE">BASE</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="a+bi">a+bi</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="r∠θ">r∠θ</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" title="Complex Conjugate Function" data-token="Conjg(">Conjg(</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" title="Argument of Complex Number" data-token="Arg(">Arg(</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="EngOn">EngOn</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="EngOff">EngOff</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-sky-300 font-mono font-semibold rounded-none px-2 py-1 text-xs" data-token="LineMode">LineMode</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="n">n</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="x̄">x̄</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="ȳ">ȳ</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑x">∑x</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑x²">∑x²</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑y">∑y</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑y²">∑y²</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono rounded-none px-2 py-1 text-xs" data-token="∑xy">∑xy</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono text-[11px] rounded-none px-2 py-1" data-token="xσn">xσn</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono text-[11px] rounded-none px-2 py-1" data-token="xσn-1">xσn-1</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono text-[11px] rounded-none px-2 py-1" data-token="yσn">yσn</button>
+                        <button class="btn-token bg-slate-800 hover:bg-slate-700 text-amber-300 font-mono text-[11px] rounded-none px-2 py-1" data-token="yσn-1">yσn-1</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Central Editor Block -->
+            <div class="bg-white dark:bg-slate-800 rounded-none p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-code text-sky-500"></i> Program Code Editor
+                    </label>
+                    <div class="flex gap-2">
+                        <button id="btn-clear" class="px-2 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-300 text-xs rounded-none transition font-medium">Clear</button>
+                        <button id="btn-format" class="px-2 py-1 bg-sky-100 dark:bg-sky-900/60 hover:bg-sky-200 text-sky-700 dark:text-sky-300 text-xs rounded-none transition font-medium">Format</button>
+                    </div>
+                </div>
+
+                <textarea id="code-editor" rows="5" placeholder="Enter CASIO fx-50FH code here or click tokens above..." 
+                    class="w-full p-3 font-mono text-sm bg-slate-900 text-slate-100 rounded-none border border-slate-700 focus:ring-2 focus:ring-sky-500 outline-none leading-relaxed tracking-wide"></textarea>
+
+                <div class="mt-3 flex flex-wrap gap-2">
+                    <button id="btn-save" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs rounded-none shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Program
+                    </button>
+                    <button id="btn-new" class="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-none transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> New Form
+                    </button>
+                    <button id="btn-copy-code" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-none transition flex items-center gap-1.5">
+                        <i class="fa-regular fa-copy"></i> Copy Raw Code
+                    </button>
+                    <button id="btn-copy-formatted" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold text-xs rounded-none transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-clipboard-list"></i> Copy HKDSE Note
+                    </button>
+                </div>
+            </div>
+
+            <!-- Authentic CASIO LCD Preview Box -->
+            <div class="bg-slate-900 rounded-none p-4 shadow-lg border border-slate-800">
+                <div class="flex items-center justify-between mb-2 px-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-tv text-emerald-400"></i> Simulated LCD Screen Display
+                    </span>
+                    <span class="text-[10px] text-slate-500">fx-50FH 2x16 Dot-Matrix Screen</span>
+                </div>
+                
+                <div class="lcd-display rounded-none p-4 font-mono text-lg sm:text-xl tracking-wider leading-relaxed min-h-[110px] break-all border-2 border-slate-700/50 relative overflow-hidden">
+                    <div class="absolute top-1 right-2 text-[10px] font-sans opacity-60 font-semibold tracking-widest uppercase">
+                        <span id="lcd-slot-tag">P1</span> | DEG
+                    </div>
+                    <div id="lcd-preview-text" class="pt-2 whitespace-pre-wrap font-mono"></div>
+                </div>
+            </div>
+
+            <!-- HKDSE Style Format Card Display -->
+            <div class="bg-white dark:bg-slate-800 rounded-none p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 flex items-center gap-2">
+                        <i class="fa-solid fa-receipt"></i> HKDSE Format Card Preview
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-copy-card-img" title="Copy Card as Photo/Image" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-none transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-camera"></i> Copy Photo
+                        </button>
+                        <span id="dse-step-count" class="text-sm font-mono font-bold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-950 px-3 py-1 rounded-none border border-sky-300 dark:border-sky-800">
+                            0 Steps
+                        </span>
+                    </div>
+                </div>
+
+                <!-- DSE Card Container -->
+                <div id="dse-card-container" class="border-2 border-sky-500 dark:border-sky-400 rounded-none p-5 sm:p-6 bg-white dark:bg-slate-950 space-y-0 text-slate-900 dark:text-slate-100 font-mono shadow-inner">
+                    <div id="dse-formatted-lines" class="divide-y-2 divide-sky-400 dark:divide-sky-500 text-lg sm:text-xl md:text-2xl font-bold tracking-wide leading-relaxed">
+                        <div class="py-4 text-slate-400 italic text-sm font-sans text-center font-normal">Enter program code above to render formatted card...</div>
+                    </div>
+                    
+                    <div class="pt-4 mt-3 flex items-center justify-between gap-4 font-sans font-extrabold text-slate-800 dark:text-slate-200 border-t-2 border-sky-500 dark:border-sky-400">
+                        <span id="dse-card-title" class="min-w-0 flex-1 text-base sm:text-lg tracking-wide break-words leading-snug">fx-50FH Program</span>
+                        <span id="dse-card-steps-footer" class="text-sky-600 dark:text-sky-400 font-mono whitespace-nowrap text-lg sm:text-xl font-bold shrink-0">0 Steps</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Program Library & Storage -->
+        <section class="lg:col-span-5 xl:col-span-4 space-y-5">
+            <div class="bg-white dark:bg-slate-800 rounded-none p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
+                    <h2 class="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-folder-closed text-amber-500"></i> Program Library
+                    </h2>
+                    <span id="library-count" class="text-xs text-slate-500 dark:text-slate-400 font-mono font-medium">0 Saved</span>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="space-y-2 mb-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                        <input type="text" id="library-search" placeholder="Search saved programs..." 
+                            class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-none outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+
+                    <div class="flex gap-1 overflow-x-auto pb-1 text-[11px]" id="filter-slot-buttons">
+                        <button data-slot="ALL" class="btn-filter px-2.5 py-1 rounded-none bg-sky-600 text-white font-medium">All</button>
+                        <button data-slot="P1" class="btn-filter px-2.5 py-1 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">P1</button>
+                        <button data-slot="P2" class="btn-filter px-2.5 py-1 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">P2</button>
+                        <button data-slot="P3" class="btn-filter px-2.5 py-1 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">P3</button>
+                        <button data-slot="P4" class="btn-filter px-2.5 py-1 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">P4</button>
+                    </div>
+                </div>
+
+                <!-- Library Items Container -->
+                <div id="program-list" class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
+                    <div class="p-6 text-center text-xs text-slate-400 italic">No saved programs yet.</div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                    <button id="btn-load-presets" class="w-full py-2 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-xs font-semibold rounded-none border border-emerald-200 dark:border-emerald-800 transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Load Standard DSE Presets
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Image Preview Fallback -->
+    <div id="image-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-none p-5 max-w-2xl w-full shadow-2xl border border-slate-700 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-image text-amber-500"></i> High-Res Format Card Preview
+                </h3>
+                <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="overflow-auto max-h-[70vh] border border-slate-200 dark:border-slate-800 rounded-none bg-slate-100 dark:bg-slate-950 p-2 flex justify-center">
+                <img id="modal-card-img" class="max-w-full h-auto shadow-md" alt="Formatted Card HD">
+            </div>
+            <div class="flex justify-end gap-2">
+                <a id="btn-download-modal-img" download="hkdse_card.png" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-none transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-download"></i> Save PNG to PC
+                </a>
+                <button id="btn-close-modal-2" class="px-4 py-2 bg-slate-700 text-slate-200 hover:bg-slate-600 text-xs font-semibold rounded-none">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 text-white px-4 py-3 rounded-none shadow-xl border border-slate-700 flex items-center gap-3 text-xs font-medium">
+            <span id="toast-icon"><i class="fa-solid fa-circle-check text-emerald-400"></i></span>
+            <span id="toast-message">Notification message</span>
+        </div>
+    </div>
+
+    <script>
+        // Preset standard HKDSE Calculator Programs
+        const DSE_PRESETS = [
+            {
+                id: 'preset-1',
+                title: 'Quadratic Formula (一元二次方程)',
+                slot: 'P1',
+                vars: 'A=a, B=b, C=c -> X=x1, Y=x2',
+                category: 'Algebra',
+                desc: 'Calculates roots of ax² + bx + c = 0. Supports real and complex roots.',
+                code: '?→A:?→B:?→C:-B³+9A ⌟2(BC-3AD→M:√(M²-(B²-3AC)M+: If Ans=Conjg(Ans :Then ∛(M-2Ans)+∛(M:Else 2∛(Abs(M))cos 3⁻¹arg(M:IfEnd: (Ans-B) ⌟(3A→X ◢ A-Ans→M: M ⌟2: Ans+√( -3Ans²-BM ⌟A-C ⌟AM-→Y ◢'
+            },
+            {
+                id: 'preset-2',
+                title: 'Simultaneous Equations 2-Vars (二元一次聯立方程)',
+                slot: 'P2',
+                vars: 'A=a1, B=b1, C=c1, D=a2, X=b2, Y=c2 -> X=x, Y=y',
+                category: 'Algebra',
+                desc: 'Solves 2x2 system of linear equations: a1 x + b1 y = c1 and a2 x + b2 y = c2.',
+                code: '?→A:?→B:?→C:?→D:?→X:?→Y: (C X - B Y) ⌟ (A X - B D) → X ◢ (C - A X) ⌟ B → Y ◢'
+            }
+        ];
+
+        // Global State Variables
+        let programs = [];
+        let currentEditId = null;
+        let activeFilterSlot = 'ALL';
+
+        // DOM Elements
+        const codeEditor = document.getElementById('code-editor');
+        const progTitleInput = document.getElementById('prog-title');
+        const progSlotSelect = document.getElementById('prog-slot');
+        const progVarsInput = document.getElementById('prog-vars');
+        const progCategoryInput = document.getElementById('prog-category');
+        const progDescInput = document.getElementById('prog-desc');
+        const byteBadge = document.getElementById('byte-badge');
+        const lcdSlotTag = document.getElementById('lcd-slot-tag');
+        const lcdPreviewText = document.getElementById('lcd-preview-text');
+        const dseFormattedLines = document.getElementById('dse-formatted-lines');
+        const dseCardTitle = document.getElementById('dse-card-title');
+        const dseStepCount = document.getElementById('dse-step-count');
+        const dseCardStepsFooter = document.getElementById('dse-card-steps-footer');
+        const programListContainer = document.getElementById('program-list');
+        const libraryCountSpan = document.getElementById('library-count');
+        const searchInput = document.getElementById('library-search');
+        const tokenSearchInput = document.getElementById('token-search-input');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+
+        // Application Initialization
+        window.addEventListener('load', () => {
+            loadProgramsFromStorage();
+            if (programs.length === 0) {
+                programs = [...DSE_PRESETS];
+                saveProgramsToStorage();
+            }
+            setupKeypad();
+            setupTabNavigation();
+            setupEventListeners();
+            renderProgramList();
+
+            // Load first preset into editor on launch
+            if (programs.length > 0) {
+                loadProgram(programs[0].id);
+            }
+        });
+
+        // Theme Toggle Listener
+        document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Setup Keypad Tabs
+        function setupTabNavigation() {
+            const tabs = document.querySelectorAll('#tab-headers .tab-btn');
+            const panels = document.querySelectorAll('#tab-contents .tab-panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.getAttribute('data-tab');
+
+                    tabs.forEach(t => {
+                        t.className = "tab-btn px-2.5 py-1 text-xs rounded-none bg-slate-700 text-slate-300 hover:bg-slate-600 font-medium";
+                    });
+                    tab.className = "tab-btn px-2.5 py-1 text-xs rounded-none bg-amber-500 text-slate-950 font-bold";
+
+                    panels.forEach(panel => {
+                        if (panel.id === targetId) {
+                            panel.classList.remove('hidden');
+                        } else {
+                            panel.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            if (tokenSearchInput) {
+                tokenSearchInput.addEventListener('input', (e) => {
+                    filterTokens(e.target.value.toLowerCase().trim());
+                });
+            }
+        }
+
+        function filterTokens(query) {
+            const tokenButtons = document.querySelectorAll('.btn-token');
+            tokenButtons.forEach(btn => {
+                const tokenVal = btn.getAttribute('data-token').toLowerCase();
+                const btnText = btn.textContent.toLowerCase();
+                if (!query || tokenVal.includes(query) || btnText.includes(query)) {
+                    btn.classList.remove('hidden');
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+        }
+
+        // Calculate Memory Byte Size for CASIO fx-50FH Calculator
+        function calculateCasioBytes(codeStr) {
+            if (!codeStr) return 0;
+            
+            // Exclude spaces, newlines, and carriage returns from calculator byte count
+            let tempCode = codeStr.replace(/[\s\r\n]/g, '');
+
+            // Contextual extraction for M+ / M- memory functions:
+            // M+ and M- are ONLY 1-byte accumulator commands if followed by ':' or '◢' or end of string.
+            // Otherwise, 'M+5' or 'M+A' is parsed as variable M followed by addition/subtraction.
+            let mAccumulatorCount = 0;
+            tempCode = tempCode.replace(/M[+-](?=[:◢]|$)/g, () => {
+                mAccumulatorCount++;
+                return ''; // Remove matched M+/M- accumulator tokens
+            });
+
+            // Multi-byte text representation tokens that map to EXACTLY 1 calculator command byte
+            const casio1ByteTokens = [
+                'ClrMemory', 'WhileEnd', 'LineMode', 'ClrStat', 'FreqOff', 'FreqOn', 
+                'EngOff', 'EngOn', 'While', 'IfEnd', 'Goto', 'Then', 'Else', 'Step', 
+                'Next', 'Break', 'Rnd(', 'Norm', 'CMPLX', 'Conjg(', '10^(', 'e^(', 
+                'xσn-1', 'yσn-1', 'a+bi', 'r∠θ', 'BASE', 'COMP', 'Sci ', 'Fix ',
+                'Deg', 'Rad', 'Gra', 'Pol(', 'Rec(', 'Ans', 'Arg(', 'Abs(', '³√(', '∛(', '√(',
+                'xσn', 'yσn', '∑x²', '∑y²', '∑xy', '∑x', '∑y', 'x̄', 'ȳ',
+                'DT', 'SD', 'REG', 'If ', 'Lbl ', 'For ', 'To ', '=>', '≠', '≥', '≤',
+                'tan⁻¹(', 'sin⁻¹(', 'cos⁻¹(', 'tan^-1(', 'sin^-1(', 'cos^-1(', '3⁻¹', 'sin(', 'cos(', 'tan(', 'log(', 'ln(', '⁻¹', '²', '³'
+            ];
+            
+            // Sort by token length descending to ensure longer string tokens (e.g. tan⁻¹() 
+            // are matched and counted as 1 byte before single character splits
+            casio1ByteTokens.sort((a, b) => b.length - a.length);
+            
+            let count = mAccumulatorCount; // Start count with standalone M+ / M- tokens
+            
+            // Match and count each CASIO command token as EXACTLY 1 byte
+            casio1ByteTokens.forEach(token => {
+                const cleanToken = token.trim();
+                if (!cleanToken) return;
+                const regex = new RegExp(escapeRegExp(cleanToken), 'g');
+                const matches = tempCode.match(regex);
+                if (matches) {
+                    count += matches.length; // Each token counts as 1 byte
+                    tempCode = tempCode.replace(regex, '');
+                }
+            });
+            
+            // Remaining individual 1-byte characters (variables, operators, single digits)
+            count += tempCode.length;
+            return count;
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Live Byte Counter & Dual View Renderer
+        function updateByteCountAndPreview() {
+            const rawCode = codeEditor.value || '';
+            const bytes = calculateCasioBytes(rawCode);
+
+            // Update Byte Badge
+            byteBadge.textContent = `Memory: ${bytes} Bytes`;
+
+            // Update LCD Display Preview
+            const activeSlot = progSlotSelect.value || 'P1';
+            lcdSlotTag.textContent = activeSlot;
+            lcdPreviewText.textContent = rawCode || '(Empty Screen)';
+
+            // Render HKDSE Formatted Printable Card Display
+            renderDSECard(rawCode, bytes);
+        }
+
+        // Render DSE Formatted Card Display
+        function renderDSECard(rawCode, bytes) {
+            const title = progTitleInput.value.trim() || 'fx-50FH Program';
+            dseCardTitle.textContent = title;
+            dseStepCount.textContent = `${bytes} Steps`;
+            dseCardStepsFooter.textContent = `${bytes} Steps`;
+
+            if (!rawCode.trim()) {
+                dseFormattedLines.innerHTML = `<div class="py-4 text-slate-400 italic text-sm font-sans text-center font-normal">Enter program code above to render formatted card...</div>`;
+                return;
+            }
+
+            // Split code precisely at colons (:) or display triangles (◢)
+            // or before major control flow statements (If, Goto, Lbl, While, For)
+            const rawTokens = rawCode.split(/(?<=[◢:])|(?=If\b|Goto\b|Lbl\b|While\b|For\b)/g).filter(l => l.length > 0);
+            
+            // Group segments into clean rows of up to ~45-50 CASIO bytes per line
+            const formattedLines = [];
+            let currentLine = '';
+
+            rawTokens.forEach(segment => {
+                const currentLineBytes = calculateCasioBytes(currentLine);
+                const segmentBytes = calculateCasioBytes(segment);
+
+                // Start new line if row bytes exceed ~45 or if segment contains explicit line-break triggers
+                if (currentLine && (currentLineBytes + segmentBytes > 45)) {
+                    formattedLines.push(currentLine);
+                    currentLine = segment;
+                } else {
+                    currentLine += segment;
+                }
+            });
+            if (currentLine) {
+                formattedLines.push(currentLine);
+            }
+
+            let html = '';
+            formattedLines.forEach(line => {
+                let formatted = escapeHTML(line);
+
+                // 1. Highlight standalone M+ / M- accumulator command (only when followed by : or ◢ or line end)
+                formatted = formatted.replace(/M([+-])(?=[:◢]|&lt;|&gt;|$)/g, '<span class="text-amber-500 dark:text-amber-300 font-extrabold">M$1</span>');
+
+                // 2. Highlight Cube Root ³√(, ∛( and √Square Root (√( variants specifically
+                formatted = formatted.replace(/(³√|∛)\(/g, '<span class="inline-flex items-center px-1.5 py-0.5 rounded-none bg-amber-400/20 dark:bg-amber-950/90 border border-amber-400 text-amber-600 dark:text-amber-300 font-black"><sup class="text-xs mr-0.5 font-bold text-amber-500">3</sup>√&#40;</span>');
+
+                // 3. Highlight inverse trig functions (sin⁻¹(, cos⁻¹(, tan⁻¹()
+                formatted = formatted.replace(/(sin|cos|tan)⁻¹\(/g, '<span class="text-cyan-600 dark:text-cyan-400 font-bold">$1<sup class="text-[10px] text-amber-500 font-black">-1</sup>&#40;</span>');
+
+                // 4. Highlight powers & roots (², ³, ⁻¹, ^(, √()
+                formatted = formatted.replace(/⁻¹/g, '<span class="text-amber-600 dark:text-amber-400 font-black">⁻¹</span>');
+                formatted = formatted.replace(/²/g, '<span class="text-amber-600 dark:text-amber-400 font-black">²</span>');
+                formatted = formatted.replace(/³/g, '<span class="text-amber-600 dark:text-amber-400 font-black">³</span>');
+                formatted = formatted.replace(/√\(/g, '<span class="inline-flex items-center px-1.5 py-0.5 rounded-none bg-amber-400/20 dark:bg-amber-950/90 border border-amber-400 text-amber-600 dark:text-amber-300 font-bold">√&#40;</span>');
+
+                // 5. Highlight Complex Functions (Conjg, Arg, CMPLX, a+bi, r∠θ)
+                formatted = formatted.replace(/\b(Conjg|Arg)\(/g, '<span class="text-emerald-600 dark:text-emerald-400 font-bold">$1&#40;</span>');
+                formatted = formatted.replace(/\b(CMPLX|a\+bi|r∠θ)\b/g, '<span class="text-emerald-600 dark:text-emerald-400 font-bold">$1</span>');
+
+                // 6. Highlight standard Math & Coordinate Conversion functions (Abs, Rnd, Pol, Rec, sin, cos, tan, log, ln, e^, 10^)
+                formatted = formatted.replace(/\b(Abs|Rnd|Pol|Rec|sin|cos|tan|log|ln|e\^|10\^)\(/g, '<span class="text-cyan-600 dark:text-cyan-400 font-bold">$1&#40;</span>');
+
+                // 7. Highlight variables (A-D, X, Y, M, Ans)
+                formatted = formatted.replace(/\b([A-DXYM]|Ans)\b/g, '<span class="text-purple-700 dark:text-purple-300 font-extrabold">$1</span>');
+                
+                // 8. Highlight control tokens
+                formatted = formatted.replace(/\b(If|Then|Else|IfEnd|While|WhileEnd|For|To|Step|Next|Goto|Lbl|Break|ClrMemory|ClrStat|FreqOn|FreqOff)\b/g, '<span class="text-sky-600 dark:text-sky-400 font-black">$1</span>');
+
+                // 9. Highlight relational condition operators (=>, ≠, ≥, ≤)
+                formatted = formatted.replace(/(=>|≠|≥|≤)/g, '<span class="text-rose-600 dark:text-rose-400 font-black px-0.5">$1</span>');
+
+                // 10. Highlight display triangle token ◢
+                formatted = formatted.replace(/◢/g, '<span class="inline-block px-1.5 py-0.5 bg-amber-400 dark:bg-amber-500 text-slate-950 font-black rounded-none mx-1 shadow-sm">◢</span>');
+
+                html += `<div class="py-3.5 px-2 font-mono tracking-wide break-all leading-relaxed">${formatted}</div>`;
+            });
+
+            dseFormattedLines.innerHTML = html;
+        }
+
+        // Helper: Escape HTML
+        function escapeHTML(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Virtual Keypad Button Listeners
+        function setupKeypad() {
+            document.querySelectorAll('.btn-token').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const token = btn.getAttribute('data-token');
+                    insertToken(token);
+                });
+            });
+        }
+
+        // Insert Token at Cursor Position in Code Editor
+        function insertToken(token) {
+            const start = codeEditor.selectionStart;
+            const end = codeEditor.selectionEnd;
+            const text = codeEditor.value;
+
+            codeEditor.value = text.substring(0, start) + token + text.substring(end);
+            codeEditor.selectionStart = codeEditor.selectionEnd = start + token.length;
+            codeEditor.focus();
+
+            updateByteCountAndPreview();
+        }
+
+        // DOM Event Listeners Setup
+        function setupEventListeners() {
+            codeEditor.addEventListener('input', updateByteCountAndPreview);
+            progTitleInput.addEventListener('input', updateByteCountAndPreview);
+            progSlotSelect.addEventListener('change', updateByteCountAndPreview);
+
+            // Program Form Actions
+            document.getElementById('btn-save').addEventListener('click', saveCurrentProgram);
+            document.getElementById('btn-new').addEventListener('click', resetForm);
+            document.getElementById('btn-clear').addEventListener('click', () => {
+                codeEditor.value = '';
+                updateByteCountAndPreview();
+            });
+
+            document.getElementById('btn-format').addEventListener('click', formatCode);
+            document.getElementById('btn-copy-code').addEventListener('click', copyRawCode);
+            document.getElementById('btn-copy-formatted').addEventListener('click', copyFormattedNote);
+            document.getElementById('btn-copy-card-img').addEventListener('click', copyCardAsImage);
+
+            // Modal Close Events
+            document.getElementById('btn-close-modal').addEventListener('click', hideImageModal);
+            document.getElementById('btn-close-modal-2').addEventListener('click', hideImageModal);
+
+            // Search & Filter Listeners
+            searchInput.addEventListener('input', renderProgramList);
+            document.querySelectorAll('#filter-slot-buttons button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#filter-slot-buttons button').forEach(b => {
+                        b.className = "btn-filter px-2.5 py-1 text-xs rounded-none bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200";
+                    });
+                    btn.className = "btn-filter px-2.5 py-1 text-xs rounded-none bg-sky-600 text-white font-medium";
+                    activeFilterSlot = btn.getAttribute('data-slot');
+                    renderProgramList();
+                });
+            });
+
+            // Presets & Import/Export
+            document.getElementById('btn-load-presets').addEventListener('click', () => {
+                programs = [...DSE_PRESETS];
+                saveProgramsToStorage();
+                renderProgramList();
+                showToast('Restored standard HKDSE preset programs!');
+            });
+
+            document.getElementById('btn-export').addEventListener('click', exportProgramsJSON);
+            document.getElementById('input-import').addEventListener('change', importProgramsJSON);
+        }
+
+        function showImageModal(dataUrl) {
+            const modal = document.getElementById('image-modal');
+            const img = document.getElementById('modal-card-img');
+            const dlBtn = document.getElementById('btn-download-modal-img');
+            img.src = dataUrl;
+            dlBtn.href = dataUrl;
+            modal.classList.remove('hidden');
+        }
+
+        function hideImageModal() {
+            document.getElementById('image-modal').classList.add('hidden');
+        }
+
+        // Format Code (Normalizes colons and statement spacing)
+        function formatCode() {
+            let code = codeEditor.value || '';
+            if (!code.trim()) return;
+            code = code.replace(/\s*:\s*/g, ':')
+                        .replace(/\s*◢\s*/g, '◢')
+                        .replace(/Then\s+/gi, 'Then ')
+                        .replace(/If\s+/gi, 'If ')
+                        .replace(/Else\s+/gi, 'Else ')
+                        .replace(/Goto\s+/gi, 'Goto ')
+                        .replace(/Lbl\s+/gi, 'Lbl ');
+            codeEditor.value = code;
+            updateByteCountAndPreview();
+            showToast('Formatted program code syntax!');
+        }
+
+        // Copy Raw Unformatted Code
+        function copyRawCode() {
+            const raw = codeEditor.value;
+            if (!raw.trim()) {
+                showToast('No program code to copy.', 'warning');
+                return;
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(raw)
+                    .then(() => showToast('Raw program code copied!'))
+                    .catch(() => {
+                        copyToClipboard(raw);
+                        showToast('Raw program code copied!');
+                    });
+            } else {
+                copyToClipboard(raw);
+                showToast('Raw program code copied!');
+            }
+        }
+
+        // Copy Formatted Text Note (for DSE Study Notes)
+        function copyFormattedNote() {
+            const title = progTitleInput.value.trim() || 'fx-50FH Program';
+            const slot = progSlotSelect.value || 'P1';
+            const vars = progVarsInput.value.trim();
+            const desc = progDescInput.value.trim();
+            const code = codeEditor.value.trim();
+            const bytes = calculateCasioBytes(code);
+
+            if (!code) {
+                showToast('No code to generate note for.', 'warning');
+                return;
+            }
+
+            let note = `=== [CASIO fx-50FH Program: ${slot}] ${title} ===\n`;
+            if (vars) note += `Variables: ${vars}\n`;
+            if (desc) note += `Notes: ${desc}\n`;
+            note += `Memory Usage: ${bytes} Bytes / Steps\n`;
+            note += `--------------------------------------------------\n`;
+            note += `${code}\n`;
+            note += `==================================================`;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(note)
+                    .then(() => showToast('Formatted HKDSE note copied to clipboard!'))
+                    .catch(() => {
+                        copyToClipboard(note);
+                        showToast('Formatted HKDSE note copied to clipboard!');
+                    });
+            } else {
+                copyToClipboard(note);
+                showToast('Formatted HKDSE note copied to clipboard!');
+            }
+        }
+
+        // Copy Formatted Card as Photo / PNG Image with Permission Policy Fallback
+        async function copyCardAsImage() {
+            const cardElement = document.getElementById('dse-card-container');
+            if (!codeEditor.value.trim()) {
+                showToast('Program code is empty.', 'warning');
+                return;
+            }
+
+            try {
+                showToast('Rendering Ultra-HD 8K photo...', 'success');
+                const canvas = await html2canvas(cardElement, {
+                    scale: 8, // Extreme 8x scaling for ultra high resolution (~800 DPI)
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    imageTimeout: 0,
+                    onclone: (clonedDoc) => {
+                        const clonedCard = clonedDoc.getElementById('dse-card-container');
+                        if (clonedCard) {
+                            clonedCard.style.boxShadow = 'none';
+                            clonedCard.style.transform = 'none';
+                        }
+                    }
+                });
+
+                // Ensure context crispness
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                }
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        showToast('Failed to generate image.', 'warning');
+                        return;
+                    }
+                    try {
+                        const item = new ClipboardItem({ 'image/png': blob });
+                        await navigator.clipboard.write([item]);
+                        showToast('Maximum Resolution (8x HD) photo copied to clipboard!');
+                    } catch (err) {
+                        console.error('Clipboard write failed:', err);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        showImageModal(dataUrl);
+                        showToast('Direct copy blocked; opening Maximum HD preview image.', 'warning');
+                    }
+                }, 'image/png');
+            } catch (err) {
+                console.error(err);
+                showToast('Could not copy photo.', 'warning');
+            }
+        }
+
+        // Save Current Program to Local Library
+        function saveCurrentProgram() {
+            const title = progTitleInput.value.trim();
+            const code = codeEditor.value.trim();
+
+            if (!title || !code) {
+                showToast('Please enter both Title and Program Code.', 'warning');
+                return;
+            }
+
+            const programData = {
+                id: currentEditId || 'prog-' + Date.now(),
+                title: title,
+                slot: progSlotSelect.value,
+                vars: progVarsInput.value.trim(),
+                category: progCategoryInput.value.trim(),
+                desc: progDescInput.value.trim(),
+                code: code,
+                createdAt: Date.now()
+            };
+
+            if (currentEditId) {
+                const index = programs.findIndex(p => p.id === currentEditId);
+                if (index !== -1) programs[index] = programData;
+            } else {
+                programs.unshift(programData);
+            }
+
+            saveProgramsToStorage();
+            renderProgramList();
+            showToast(`Program saved to Slot ${programData.slot}!`);
+        }
+
+        // Reset Form Controls
+        function resetForm() {
+            currentEditId = null;
+            progTitleInput.value = '';
+            progSlotSelect.value = 'P1';
+            progVarsInput.value = '';
+            progCategoryInput.value = '';
+            progDescInput.value = '';
+            codeEditor.value = '';
+            updateByteCountAndPreview();
+        }
+
+        // Load Selected Program Into Editor
+        function loadProgram(id) {
+            const prog = programs.find(p => p.id === id);
+            if (!prog) return;
+
+            currentEditId = prog.id;
+            progTitleInput.value = prog.title || '';
+            progSlotSelect.value = prog.slot || 'P1';
+            progVarsInput.value = prog.vars || '';
+            progCategoryInput.value = prog.category || '';
+            progDescInput.value = prog.desc || '';
+            codeEditor.value = prog.code || '';
+
+            updateByteCountAndPreview();
+            showToast(`Loaded ${prog.title}`);
+        }
+
+        // Delete Program from Storage
+        function deleteProgram(id) {
+            programs = programs.filter(p => p.id !== id);
+            if (currentEditId === id) resetForm();
+            saveProgramsToStorage();
+            renderProgramList();
+            showToast('Program deleted from library.');
+        }
+
+        // Render Saved Program List
+        function renderProgramList() {
+            const query = searchInput.value.toLowerCase().trim();
+            const filtered = programs.filter(prog => {
+                const matchesSlot = activeFilterSlot === 'ALL' || prog.slot === activeFilterSlot;
+                const matchesSearch = !query || 
+                    prog.title.toLowerCase().includes(query) || 
+                    (prog.category && prog.category.toLowerCase().includes(query)) ||
+                    prog.code.toLowerCase().includes(query);
+                return matchesSlot && matchesSearch;
+            });
+
+            libraryCountSpan.textContent = `${filtered.length} Saved`;
+
+            if (filtered.length === 0) {
+                programListContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 italic">No matching programs found in library.</div>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(prog => {
+                const bytes = calculateCasioBytes(prog.code);
+                html += `
+                    <div class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-none p-3 hover:border-sky-500 transition shadow-sm group">
+                        <div class="flex items-start justify-between gap-2 mb-1.5">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="px-2 py-0.5 bg-sky-600 text-white font-mono font-bold text-[10px] rounded-none">${prog.slot}</span>
+                                <h3 class="font-bold text-xs text-slate-800 dark:text-slate-100 line-clamp-1">${escapeHTML(prog.title)}</h3>
+                            </div>
+                            <span class="text-[10px] font-mono text-slate-500 bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded-none">${bytes}B</span>
+                        </div>
+                        ${prog.vars ? `<p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mb-1 truncate">Vars: ${escapeHTML(prog.vars)}</p>` : ''}
+                        <div class="font-mono text-xs bg-slate-900 text-slate-200 p-2 rounded-none truncate border border-slate-800 mb-2">
+                            ${escapeHTML(prog.code)}
+                        </div>
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-400 text-[10px]">${prog.category || 'General'}</span>
+                            <div class="flex gap-1.5 opacity-90 group-hover:opacity-100">
+                                <button onclick="loadProgram('${prog.id}')" class="px-2 py-1 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-none text-[10px] flex items-center gap-1">
+                                    <i class="fa-solid fa-folder-open"></i> Load
+                                </button>
+                                <button onclick="deleteProgram('${prog.id}')" class="px-2 py-1 bg-rose-700 hover:bg-rose-600 text-white font-semibold rounded-none text-[10px] flex items-center gap-1">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            programListContainer.innerHTML = html;
+        }
+
+        // Local Storage Methods
+        function saveProgramsToStorage() {
+            try {
+                localStorage.setItem('casio_fx50fh_programs', JSON.stringify(programs));
+            } catch (e) {
+                console.error('Failed to save to local storage', e);
+            }
+        }
+
+        function loadProgramsFromStorage() {
+            try {
+                const stored = localStorage.getItem('casio_fx50fh_programs');
+                if (stored) {
+                    programs = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.error('Failed to load local storage', e);
+                programs = [];
+            }
+        }
+
+        // Export Programs as JSON
+        function exportProgramsJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(programs, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `casio_fx50fh_backup_${Date.now()}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
+            showToast('Exported programs JSON backup!');
+        }
+
+        // Import Programs from JSON
+        function importProgramsJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    if (Array.isArray(imported)) {
+                        programs = imported;
+                        saveProgramsToStorage();
+                        renderProgramList();
+                        showToast(`Imported ${imported.length} programs successfully!`);
+                    } else {
+                        showToast('Invalid JSON structure.', 'warning');
+                    }
+                } catch (err) {
+                    showToast('Failed to parse JSON file.', 'warning');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Fallback Copy Function using document.execCommand
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Toast Message Notification Helper
+        function showToast(msg, type = 'success') {
+            toastMessage.textContent = msg;
+            if (type === 'warning') {
+                toastIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>`;
+            } else {
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i>`;
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
